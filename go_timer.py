@@ -41,9 +41,12 @@ def main():
     gui.start()
     listener.start()
 
-    gui.join()
-    listener.shutdown()
-    listener.join()
+    try:
+        gui.join()
+        listener.shutdown()
+        listener.join()
+    except KeyboardInterrupt:
+        os._exit(0)
 
 if __name__ == "__main__":
     main()

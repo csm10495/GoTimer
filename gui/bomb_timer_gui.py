@@ -94,6 +94,9 @@ class TimerGui(multiprocessing.Process):
 
     def run(self):
         self.root = Tk()
+
+        # always on top of other windows
+        self.root.attributes("-topmost", True)
         self.root.configure(background=BG_COLOUR)
         self.root.title("GoTimer")
 
@@ -108,4 +111,7 @@ class TimerGui(multiprocessing.Process):
         self.gui.pack()
 
         self.check_messages()
-        self.root.mainloop()
+        try:
+            self.root.mainloop()
+        except KeyboardInterrupt:
+            os._exit(0)
