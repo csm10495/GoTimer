@@ -1,12 +1,15 @@
 from tkinter import *
 import time
 import os
+import pathlib
 import math
 import multiprocessing
 from queue import Empty
 from misc.config import *
 from misc.messages import *
 
+GEOMETRY_SAVE_FILE = pathlib.Path("~/go_timer.geo").expanduser()
+CHECK_GEOMETRY_INTERVAL = 1000
 
 class TimerCanvas(Canvas):
 
@@ -92,6 +95,14 @@ class TimerGui(multiprocessing.Process):
 
         self.root.after(GUI_CHECK_MSG_INTERVAL, self.check_messages)
 
+    def save_location(self):
+        this_geometry = self.root.geometry()
+        if self.last_geometry != this_geometry:
+            GEOMETRY_SAVE_FILE.write_text(this_geometry)
+            self.last_geometry = this_geometry
+
+        self.root.after(CHECK_GEOMETRY_INTERVAL, self.save_location)
+
     def run(self):
         self.root = Tk()
 
@@ -102,6 +113,13 @@ class TimerGui(multiprocessing.Process):
         self.root.resizable(0,0)
         self.root.configure(background=BG_COLOUR)
         self.root.title("GoTimer")
+
+        # check every second if the window moved. If it did, save the location.
+        self.last_geometry = None
+        if GEOMETRY_SAVE_FILE.exists():
+            self.root.geometry(GEOMETRY_SAVE_FILE.read_text())
+        self.last_geometry = self.root.geometry()
+        self.save_location()
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
         parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
