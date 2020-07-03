@@ -97,6 +97,9 @@ class TimerGui(multiprocessing.Process):
 
         # always on top of other windows
         self.root.attributes("-topmost", True)
+
+        # remove resize
+        self.root.resizable(0,0)
         self.root.configure(background=BG_COLOUR)
         self.root.title("GoTimer")
 
