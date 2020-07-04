@@ -1,8 +1,11 @@
+import http.server
 import json
 import multiprocessing
-import http.server
+import os
 import socketserver
+import time
 import urllib.request
+
 from misc.config import *
 from misc.messages import *
 
@@ -67,9 +70,22 @@ class ListenerWrapper(multiprocessing.Process):
         self.server = None
 
     def run(self):
-        self.server = ListenerServer(
-            ("127.0.0.1", 3000), PostHandler, self.msg_queue)
-        self.server.serve_forever()
+        for i in range(5):
+            try:
+                self.server = ListenerServer(("127.0.0.1", 3000), PostHandler, self.msg_queue)
+                break
+            except OSError as ex:
+                print (f"Sleeping a moment ({i ** 2} seconds) since we couldn't bind: {ex}")
+                time.sleep(i ** 2)
+                continue
+
+        if not self.server:
+            raise EnvironmentError("Unable to bind")
+
+        try:
+            self.server.serve_forever()
+        except KeyboardInterrupt:
+            os._exit(0)
 
     def shutdown(self):
         req = urllib.request.Request("http://127.0.0.1:3000/shutdown", data=b"")

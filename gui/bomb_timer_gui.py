@@ -26,18 +26,24 @@ class TimerCanvas(Canvas):
     def start_timer(self, start_time=BOMB_TIME):
         if self.timer_running:
             return
+
+        # un-minimize when the timer is started
+        self.parent.state("normal")
+
         self.stop_timer = False
-        self.start_time = time.clock()
+        self.start_time = time.time()
         self.timer_running = True
         self.update_timer()
 
     def update_timer(self):
-        now = time.clock()
+        now = time.time()
         time_left = BOMB_TIME - (now - self.start_time)
 
         if self.stop_timer:
             self.set_text(IDLE_TEXT)
             self.timer_running = False
+            # minimize when timer is done
+            self.parent.state('iconic')
         elif time_left < 0:
             self.set_text(IDLE_TEXT)
             self.timer_running = False
@@ -120,6 +126,9 @@ class TimerGui(multiprocessing.Process):
             self.root.geometry(GEOMETRY_SAVE_FILE.read_text())
         self.last_geometry = self.root.geometry()
         self.save_location()
+
+        # minimize
+        self.root.state("iconic")
 
         current_dir = os.path.dirname(os.path.realpath(__file__))
         parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir))
