@@ -47,6 +47,8 @@ class TimerCanvas(Canvas):
         elif time_left < 0:
             self.set_text(IDLE_TEXT)
             self.timer_running = False
+            # minimize when bomb explodes
+            self.parent.state('iconic')
         else:
             self.set_time_left(time_left)
             self.after(11, self.update_timer)
